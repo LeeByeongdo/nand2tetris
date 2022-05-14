@@ -15,43 +15,48 @@
 (START)
 @SCREEN
 D=A
-@i
+@0
 M=D
 
+(KBDCHECK)
 @KBD
 D=M
 @WHITE
 D;JEQ
 @BLACK
+D;JGT
+
+@KBDCHECK
 0;JMP
 
 
 (WHITE)
-@j
+@1
 M=0
 @LOOP
 0;JMP
 
 (BLACK)
-@j
+@1
 M=-1
 @LOOP
 0;JMP
 
 (LOOP)
-@j
+@1
 D=M
-@i
+@0
 A=M
 M=D
 
-@i
+@0
 D=M+1
 @KBD
 D=A-D
 
-@i
+@0
 M=M+1
+A=M
 
 @LOOP
 D;JGT
