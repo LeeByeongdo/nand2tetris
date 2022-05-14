@@ -25,6 +25,9 @@
  * than to the address resulting from executing the current instruction. 
  */
 
+ // 1  1  1  a  c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+ // 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+
 CHIP CPU {
 
     IN  inM[16],         // M value input  (M = contents of RAM[A])
@@ -39,5 +42,35 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    Not(in=instruction[15], out=addressCommand);
+    Mux16(a=outalu, b=instruction, sel=addressCommand, out=mux1Out);
+    
+    And(a=instruction[5], b=instruction[15], out=loadAreg1);
+    Or(a=loadAreg1, b=addressCommand, out=loadAreg);
+
+    ARegister(in=mux1Out, load=loadAreg, out=A, out[0..14]=addressM);
+
+    And(a=instruction[15], b=instruction[12], out=acommand);
+    Or(a=acommand, b=addressCommand, out=AMSel);
+
+    Mux16(a=A, b=inM, sel=AMSel, out=y);
+
+    And(a=instruction[4], b=instruction[15], out=loadDreg);
+    DRegister(in=outalu, load=loadDreg, out=D);
+
+    ALU(x=D, y=y, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, zr=zr, ng=ng, out=outalu);
+
+    And(a=instruction[2], b=ng, out=load1);
+    And(a=instruction[1], b=zr, out=load2);
+    Not(in=ng, out=notng);
+    Not(in=zr, out=notzr);
+    And(a=notzr, b=notng, out=notngzr);
+    And(a=instruction[0], b=notngzr, out=load3);
+    Or(a=load1, b=load2, out=or1);
+    Or(a=or1, b=load3, out=load);
+
+    And(a=load, b=instruction[15], out=loadPC);
+    PC(in=A, load=loadPC, inc=true, reset=reset, out[0..14]=pc);
+
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }

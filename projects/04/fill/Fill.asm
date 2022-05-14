@@ -20,10 +20,11 @@ M=D
 
 @KBD
 D=M
-@BLACK
-D;JGT
 @WHITE
 D;JEQ
+@BLACK
+0;JMP
+
 
 (WHITE)
 @j
